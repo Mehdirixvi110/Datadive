@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Build the full public site (design §11/§16/§17/§18): shared UI primitives, reduced-motion baseline motion components, nav/footer/dynamic WhatsApp chrome, all home sections (Hero, About, Services, Industries, Work, Stats, Clients, Reviews, Team, Cta, Contact) as RSC reading the DAL, the contact form + submitContact server action (honeypot + rate limit), blog list/post with sanitized Markdown, work detail, branded 404, SEO (sitemap/robots/single-source OG), and the nice-to-have DiveField interactive hero. Depends on FEAT-001 + FEAT-002 (and uses the auth-free public path only). Independent of FEAT-003.",
+  "status": "pending",
+  "steps": [
+    "Read context.json FIRST, then design.md §11 (public routes/pages), §16 (visual/motion + DiveField), §17 (SEO/OG), §18 (a11y), §13/§14 (contact validation/errors), and inspiration-notes.md (section order, typography, color, motion). All paths under datadive-web.",
+    "src/components/ui/*.tsx: Button, Card, Badge, Input, Textarea, Select, Container (max-w-7xl px-6), Section (py-24 md:py-32 + optional surface band), SectionHeading, Toast — focus-visible rings + AA contrast (these are reused by FEAT-005 admin).",
+    "src/components/motion/*.tsx: Reveal (IntersectionObserver fade/slide-up), CountUp (rAF 0->value, instant under reduced motion), GlowBlob (pure-CSS blurred radial gradient); wrap the app in <MotionConfig reducedMotion='user'>. All honor prefers-reduced-motion.",
+    "src/components/nav/*: Navbar (client, sticky, logo + data-driven NavLinks + CTA, mobile menu keyboard-operable with aria-expanded, focus-trapped, Esc-closes — FR-1.3); Footer (email/LinkedIn/website from settings); WhatsAppButton (client, builds wa.me/<digits>?text=, HIDDEN entirely when no number — FR-13.4, focusable + aria-label, reduced-motion entrance). Update src/app/layout.tsx to render Navbar+Footer+WhatsAppButton from getSettings()+getNavLinks().",
+    "src/components/sections/*.tsx + src/app/page.tsx: home sections as RSC reading DAL props, interactive bits as nested client components, in order Hero->About->Services->Industries->Work->Stats->Clients->Reviews->Team->Cta->Contact. Icon keys -> lucide via the mapper's §5.4/§5.7 mapping (Sparkles default). Services 2x2/4-up; Industries 5-up responsive; Work card grid where a card links to /work/[slug] ONLY when hasDetail (F6) -> mobile scroll-snap; Stats uses CountUp; Clients grouped by SectorGroup with name text fallback (FR-8.2); all images via next/image with alt. page.tsx sets export const revalidate=3600 and attaches all section tags + settings + nav.",
+    "src/components/sections/Contact.tsx + src/app/actions/contact.ts: ContactForm (client, react-hook-form + contact Zod schema, honeypot field, preserves values on error, inline field errors + aria-describedby). submitContact server action: server-side Zod validate -> honeypot silent-drop (200) -> per-IP in-memory token-bucket rate limit (<=5/min, friendly 429) -> createContactSubmission -> success/error result preserving values; best-effort email notify only if RESEND_API_KEY+CONTACT_NOTIFY_TO set (a send failure logs but never fails submission). No secrets/PII in client-visible errors.",
+    "Blog + work routes + Markdown: src/app/blog/page.tsx (published, reverse-chron by PublishDate, empty-state safe — FR-10); src/app/blog/[slug]/page.tsx (generateStaticParams from getPublishedPostSlugs(), dynamicParams=true, per-post generateMetadata + OG/Twitter + canonical, notFound() on unknown/draft); src/app/work/[slug]/page.tsx (generateStaticParams from getProjectDetailSlugs(), notFound() when draft or empty Body — F6/F8); src/components/blog/Markdown.tsx (react-markdown + remark-gfm + rehype-sanitize — NFR-11.4); src/components/blog/PostCard.tsx.",
+    "SEO + 404: src/app/not-found.tsx (branded, home link — FR-1.6); src/app/sitemap.ts (/, /blog, each published post, each hasDetail project); src/app/robots.ts (allow all + sitemap); src/app/opengraph-image.tsx producing the generated brand-OG FALLBACK bytes only — generateMetadata.openGraph.images (Settings.OgImageUrl -> generated fallback) stays the single og:image source of truth (N4).",
+    "DiveField (NICE-TO-HAVE, FR-17 — must NOT jeopardize core delivery): src/components/motion/DiveField.tsx — decorative aria-hidden <canvas> behind the real hero headline/CTA, <=60 points, requestAnimationFrame, DPR-aware, PAUSED offscreen (IntersectionObserver) + when tab hidden (visibilitychange), pointer parallax via transforms only; on touch / prefers-reduced-motion render a static constellation. Mount in Hero. If it risks build/perf/layout, ship the hero with gradient glow only — no requirement fails.",
+    "Set FEAT-004 status to completed; in findings note the shared ui/ component APIs reused by admin and any section needing special admin wiring. Commit locally inside datadive-web (never push)."
+  ],
+  "acceptance_criteria": [
+    "`npm run build` + `npm run lint` pass with ZERO env vars.",
+    "`npm start` (zero env) renders / with every section populated from seed — no crashes, empty screens, or broken images; placeholders render through next/image.",
+    "/blog lists seed posts, a seed /blog/[slug] renders sanitized Markdown with per-post metadata, an unknown/draft slug 404s; a hasDetail seed /work/[slug] renders and a bodyless/draft slug 404s.",
+    "WhatsApp button builds a correct wa.me link from seed settings and hides when the number is empty; mobile nav is keyboard-operable, focus-trapped, Esc-closes.",
+    "`npx vitest run` passes the submitContact tests (honeypot drop, rate-limit trip, Airtable-failure retains values).",
+    "DiveField (if delivered) respects reduced motion / touch and does not regress the build; if cut, the hero still renders fully."
+  ],
+  "verification": [
+    "cd datadive-web && npm run build && npm run lint  (zero env — must pass)",
+    "npx vitest run  (contact-action tests pass)",
+    "npm start then load / , /blog , a seed post, a seed project, and a bad slug (404)  (all render per spec from seed)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

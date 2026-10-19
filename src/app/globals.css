@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Datadive theme tokens (design §16) — dark, premium, modern.
+ * These CSS custom properties are the single source of truth for the palette;
+ * tailwind.config.ts surfaces them as Tailwind color tokens.
+ */
+:root {
+  --color-bg: #0b0f17;
+  --color-surface: #111726;
+  --color-card: #141b2d;
+  --color-border: rgba(148, 163, 184, 0.14);
+  --color-text: #e6eaf2;
+  --color-muted: #9aa7bd;
+
+  /* Brand blue scale (anchor #1E6FEB) */
+  --color-brand-50: #eaf1fe;
+  --color-brand-100: #d2e1fd;
+  --color-brand-200: #a6c3fb;
+  --color-brand-300: #79a4f8;
+  --color-brand-400: #4d86f2;
+  --color-brand-500: #1e6feb;
+  --color-brand-600: #1658c4;
+  --color-brand-700: #10459c;
+  --color-brand-800: #0c3375;
+  --color-brand-900: #08214d;
+
+  /* Cyan depth accent — hero/CTA gradient partner */
+  --color-depth: #22d3ee;
+
+  /* Accent roles */
+  --color-accent-amber: #f59e0b;
+  --color-accent-red: #ef4444;
+  --color-accent-green: #22c55e;
+  --color-accent-blue: #1e6feb;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible keyboard focus ring everywhere (design §18) */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Skip-to-content link: hidden until focused (design §18) */
+  .skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100;
+    transform: translateY(-150%);
+    border-radius: 0.5rem;
+    background-color: var(--color-brand-500);
+    padding: 0.5rem 1rem;
+    color: #fff;
+    transition: transform 0.15s ease-in-out;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+/* Honor the user's reduced-motion preference globally (design §16/§18) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

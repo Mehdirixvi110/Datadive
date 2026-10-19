@@ -1,0 +1,28 @@
+{
+  "extends": ["next/core-web-vitals", "prettier"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "**/lib/airtable/client",
+              "@/lib/airtable/client",
+              "airtable"
+            ],
+            "message": "The Airtable client/REST layer may only be imported inside src/lib/airtable/**. Go through the DAL (src/lib/airtable/read|write) instead (design §3/§15)."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/lib/airtable/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "task_id": "task-datadive-build",
+  "task_description": "Build the production-ready Datadive marketing website in c:\\Users\\Syed Mehdi Abbas\\Downloads\\datadive\\datadive-web from the locked design.md: Next.js 15 App Router + TS + Tailwind 3.4, a server-only typed Airtable REST DAL with seed fallback, NextAuth v5 Google admin with ADMIN_EMAILS allowlist, Vercel Blob uploads, all public sections + blog + work + contact + dynamic WhatsApp, full admin CRUD, ISR + per-table tag revalidation, Vitest tests, isolated git inside datadive-web, .env.example, and README. Must build + lint + render fully from seed data with ZERO env vars.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

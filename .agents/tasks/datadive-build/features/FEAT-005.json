@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Build the admin dashboard (design §12): ungated force-dynamic /admin/login, the (protected) route-group shell gated by requireAdminPage(), shared admin components (EntityTable/EntityForm/ImageField/OrderControls/DeleteButton), the Vercel Blob client-upload route guarded by requireAdmin(), full per-entity CRUD pages + server actions (singletons + lists + submissions triage) with Zod re-validation + revalidateTag + degraded no-creds mode, the optional secret-gated revalidate route, and the admin/action integration tests. Also write README.md and run the final zero-env gate. Depends on FEAT-001/002/003/004 (reuses auth guards + DAL + validation + shared ui/).",
+  "status": "pending",
+  "steps": [
+    "Read context.json FIRST, then design.md §12 (admin & CRUD), §10 (Vercel Blob upload), §7 (revalidation), §9 (guards), §13 (validation), §14 (write error handling), §22 (tests), §25 (accepted FR-24.4 reading for README). All paths under datadive-web.",
+    "src/app/admin/login/page.tsx OUTSIDE the (protected) group, export const dynamic='force-dynamic', rendering Google sign-in / AccessDenied / 'sign-in not configured' (branches on hasAuthCreds() + ?error) so there is no redirect loop (F1) and cred-detection is request-time (N1).",
+    "src/app/admin/(protected)/layout.tsx: calls requireAdminPage() then renders the dashboard shell (nav to every entity + settings, signed-in identity, SignOut); export const dynamic='force-dynamic'. src/app/admin/(protected)/page.tsx: dashboard home with per-entity counts + quick links. When !hasAirtableCreds() show the read-only 'content backend not configured — saves disabled' banner (§12). src/components/admin/SignOut.tsx.",
+    "src/components/admin/*.tsx: EntityTable (order + visibility/published flags + edit/delete), EntityForm (client, react-hook-form + the entity Zod schema), ImageField (upload via @vercel/blob/client upload() -> /api/blob/upload, OR paste a Datadive Blob URL host-validated per §13, with a required alt input whenever a URL is present; when BLOB_READ_WRITE_TOKEN absent, disable upload but still accept a pasted host-validated URL), OrderControls (up/down writing Order), DeleteButton (confirm dialog). Reuse the FEAT-004 ui/ primitives.",
+    "src/app/api/blob/upload/route.ts: handleUpload — onBeforeGenerateToken calls requireAdmin() and maps a thrown AuthError to a 401 Response; allowedContentTypes image/jpeg|png|webp|avif; maximumSizeInBytes 8MB; addRandomSuffix:true; SVG disallowed. onUploadCompleted server-log only.",
+    "Per-entity CRUD over the uniform pattern (§12/§20): singletons /admin/settings, /hero, /about, /cta (single edit form, save upserts the one row). Lists each with page.tsx (RSC reads getAll*) + new/page.tsx + [id]/page.tsx (reads getXById): /admin/nav, /services, /projects (inline ProjectImages gallery editor using the FEAT-002 ProjectImages writers), /industries, /stats, /clients, /reviews, /team, /blog (published/draft toggle). /admin/submissions read + status triage New/Read/Archived (no create). src/app/admin/actions/*.ts: every mutating action wrapped in withAdmin(), re-validates with Zod, writes via the DAL, calls revalidateTag(...) (settings also revalidates nav; blog/project also the per-item tag blogpost:{slug}/project:{slug}), redirects back with a success toast. When !hasAirtableCreds(), the action returns the typed 'content backend not configured' result and makes NO network call.",
+    "src/app/api/revalidate/route.ts (OPTIONAL, §7): POST { tag } behind a REVALIDATE_SECRET bearer header; returns 404/501 when the secret is unset. Not required for normal admin flow.",
+    "src/app/admin/actions/__tests__/*.test.ts (Vitest, mocked auth + fetch): unauthorized action rejected before any DAL call; valid create -> DAL write + revalidateTag called; invalid input -> field errors, no write; no-creds save -> typed 'not configured' result, no network.",
+    "README.md: setup; the full §5 Airtable schema contract mirroring schema.ts exactly; every §20 env var; deploy-to-Vercel (project root datadive-web/); and the ACCEPTED FR-24.4 reading VERBATIM — table names default in code with optional AIRTABLE_TABLE_* env overrides, only the Airtable base id + API key mandatory (§25/N3). Note the §23/NFR-14 Python/Auto-ETL seam as documentation only (not built).",
+    "FINAL ZERO-ENV GATE: from datadive-web with no env — npm install from the committed lockfile, npm run build, npm run lint, npx vitest run all pass; npm start serves / fully from seed. Fix any cross-feature seams. Remove temp/scratch files. Set FEAT-005 status to completed and record final results in findings. Commit locally inside datadive-web (never push)."
+  ],
+  "acceptance_criteria": [
+    "`npm run build` + `npm run lint` pass with ZERO env vars; `npx vitest run` passes all tests including the admin/action suite.",
+    "Unauthenticated /admin redirects to /admin/login; /admin/login shows the 'sign-in not configured' notice with zero env (no 500, no redirect loop).",
+    "With no Airtable creds, admin pages render from seed and any save returns the typed 'content backend not configured' result with no network call (degraded banner shown).",
+    "The Blob upload route rejects non-admins with 401, enforces type/size, and disallows SVG; ImageField still accepts a pasted host-validated Blob URL when the token is absent.",
+    "A valid admin create/update/delete writes via the DAL and triggers revalidateTag for the affected entity (settings also nav; blog/project also the per-item tag) — covered by integration tests.",
+    "README documents every env var, mirrors the §5 schema contract, and carries the accepted FR-24.4 reading verbatim; the final zero-env gate (build+lint+vitest+start) passes."
+  ],
+  "verification": [
+    "cd datadive-web && npm run build && npm run lint  (zero env — must pass)",
+    "npx vitest run  (all tests incl. admin/action suite pass)",
+    "npm start then verify /admin -> /admin/login redirect and the no-creds 'not configured' notice + degraded admin render"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

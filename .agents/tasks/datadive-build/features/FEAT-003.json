@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Build auth & access control (design §9): NextAuth v5 (Auth.js) Google provider with JWT sessions kept Edge-compatible, the ADMIN_EMAILS allowlist enforced twice, the two admin guards (requireAdminPage redirect / requireAdmin throw) over one auth()+allowlist check with a narrow withAdmin() catch, the hasAuthCreds() guard checked before EVERY auth() call (middleware, guards, [...nextauth] handler) so the zero-env build never hits lazy MissingSecret, the auth route handler, and middleware scoped to /admin/:path* (excluding /admin/login). Depends on FEAT-001 + FEAT-002 (utils hasAuthCreds/logger).",
+  "status": "pending",
+  "steps": [
+    "Read context.json FIRST, then design.md §9 (auth & access control), §2 (next-auth@5.0.0-beta.25 pin), §15 (invariants). Re-confirm the lazy-MissingSecret / no-throw-at-construction behavior against next-auth@5.0.0-beta.25 as installed. All paths under datadive-web.",
+    "src/lib/auth/config.ts: NextAuth v5 options — Google provider reading AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET (accept GOOGLE_CLIENT_ID/SECRET aliases), JWT sessions, pages.signIn='/admin/login', signIn callback rejecting user.email (lowercased) not in ADMIN_EMAILS (comma-split, trimmed, lowercased) -> redirect /admin/login?error=AccessDenied. MUST stay Edge-compatible: JWT only, NO database adapter, NO Node-only crypto imports (N6).",
+    "src/auth.ts: re-export { handlers, auth, signIn, signOut } from lib/auth/config.",
+    "src/lib/auth/require-admin.ts: over ONE shared auth()+allowlist check expose requireAdminPage() (returns session or redirect('/admin/login')) and requireAdmin() (returns session or THROWS AuthError, never redirects); and withAdmin(action) whose catch is NARROW — maps only AuthError to a typed 401-style result and RE-THROWS any error whose digest starts with NEXT_REDIRECT/NEXT_NOT_FOUND (and other non-AuthError) so success redirect()/notFound() propagate (N2). All three short-circuit on !hasAuthCreds() BEFORE any auth() call (fail safe — F2): requireAdminPage redirects, requireAdmin throws AuthError.",
+    "src/app/api/auth/[...nextauth]/route.ts: re-export handlers but short-circuit to a 404/501 Response when !hasAuthCreds() (do not construct a live handler).",
+    "src/middleware.ts: matcher scoped to /admin/:path* EXCLUDING /admin/login. First check hasAuthCreds() (false -> redirect /admin/* to /admin/login WITHOUT calling auth), then (creds present) redirect unauthenticated requests to sign-in. Keep the matcher narrow so public routes never invoke auth().",
+    "src/lib/auth/__tests__/require-admin.test.ts (Vitest): allowlist logic (email in/out, case-insensitive, empty ADMIN_EMAILS), and hasAuthCreds() gating behavior. No live auth.",
+    "Set FEAT-003 status to completed; in findings record the exact exported guard/action names (requireAdminPage, requireAdmin, withAdmin) + the typed action-result shape so FEAT-005 wires actions precisely. Commit locally inside datadive-web (never push)."
+  ],
+  "acceptance_criteria": [
+    "`npm run build` passes with ZERO env vars — NextAuth construction does NOT throw and /admin/* would safely redirect rather than 500.",
+    "`npm run lint` passes.",
+    "`npx vitest run` passes the allowlist + hasAuthCreds tests.",
+    "The config imported by middleware.ts is Edge-safe (JWT only, no adapter/Node-only imports) and the matcher is scoped to /admin/:path* excluding /admin/login.",
+    "withAdmin() maps only AuthError to a 401-style result and re-throws NEXT_REDIRECT/NEXT_NOT_FOUND (unit-covered or clearly implemented)."
+  ],
+  "verification": [
+    "cd datadive-web && npm run build  (zero env — must pass, no construction throw)",
+    "npx vitest run  (auth tests pass)",
+    "npm run lint  (passes)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

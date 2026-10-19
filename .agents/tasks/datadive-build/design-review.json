@@ -1,0 +1,91 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "summary": {
+    "high": 0,
+    "medium": 2,
+    "nit": 8
+  },
+  "findings": [
+    {
+      "id": "M1",
+      "severity": "MEDIUM",
+      "title": "Reviews empty-table behavior contradicts FR-9.2",
+      "location": "design.md \u00a78 empty-result list rule; \u00a75.10; vs requirements FR-9.2",
+      "problem": "\u00a78 says list reads (naming 'reviews') return the real empty set and never reinject seed when creds are present and the table is empty, so an empty Reviews table renders an empty state. FR-9.2 requires seeded placeholder reviews when no reviews exist in the data source. Requirements deliberately split blog (empty-state, FR-10.5) from reviews (seed fallback, FR-9.2); the design collapses both into one rule and silently misses FR-9.2.",
+      "fix": "Either special-case getReviews() to return seed placeholders when the live Reviews table is empty (keep other lists on the empty-set rule), or amend FR-9.2 to the empty-state behavior and document it. Do not leave design and FR-9.2 in silent conflict."
+    },
+    {
+      "id": "M2",
+      "severity": "MEDIUM",
+      "title": "Admin reads are cached by the DAL, contradicting \u00a77 '/admin = no cache / always live'",
+      "location": "design.md \u00a76 (client.ts attaches next:{revalidate,tags} to all reads) vs \u00a77 route table (/admin/* dynamic/force-dynamic, always live)",
+      "problem": "\u00a76 attaches next:{revalidate,tags} to every DAL read with no carve-out for admin getAll*/getXById. In Next 15 an explicit per-fetch next.revalidate persists in the Data Cache even under force-dynamic (force-dynamic only changes the default to no-store; explicit options win). So admin screens read cached data, making \u00a77's 'always live' false; in-app edits stay fresh via revalidateTag, but out-of-band Airtable edits are invisible to admins for up to the 1h backstop. The fetch-level revalidate value for public reads is also unspecified.",
+      "fix": "Split read caching by audience in the DAL: public reads use next:{revalidate:<explicit N>,tags}; admin reads (getAll*, getXById, getSubmissions) use cache:'no-store' with no tags. Reconcile \u00a76 and \u00a77 wording and state the public fetch-level revalidate value."
+    },
+    {
+      "id": "N1",
+      "severity": "NIT",
+      "title": "/admin/login render mode unspecified but branches on env + query",
+      "location": "design.md \u00a74 (app/admin/login/page.tsx), \u00a79",
+      "problem": "The ungated login page renders one of three states driven by hasAuthCreds() (env) and ?error=AccessDenied (query). If statically prerendered, hasAuthCreds() freezes at build time. It likely becomes dynamic via searchParams, but the design relies on that implicitly for a security-adjacent page.",
+      "fix": "Add export const dynamic = 'force-dynamic' to app/admin/login/page.tsx (or document that it reads searchParams, forcing dynamic rendering) so cred-detection is request-time."
+    },
+    {
+      "id": "N2",
+      "severity": "NIT",
+      "title": "withAdmin() must not swallow NEXT_REDIRECT / NEXT_NOT_FOUND",
+      "location": "design.md \u00a79 (withAdmin maps thrown AuthError to 401), \u00a712 (actions redirect on success)",
+      "problem": "Create/edit actions return a typed result and also call redirect() on success; redirect()/notFound() work by throwing NEXT_REDIRECT/NEXT_NOT_FOUND. A broad catch in withAdmin() that converts 'the throw' to a 401 result would break every admin success navigation.",
+      "fix": "In withAdmin(), catch only AuthError (or re-throw errors whose digest starts with NEXT_REDIRECT/NEXT_NOT_FOUND) so framework control-flow propagates."
+    },
+    {
+      "id": "N3",
+      "severity": "NIT",
+      "title": "FR-24.4 'table names from env' vs server-side constants (needs owner acknowledgement)",
+      "location": "design.md \u00a75 intro, \u00a725, \u00a727 F7; vs FR-24.4",
+      "problem": "FR-24.4 lists table names among values that SHALL come from env vars. The design uses server-side constants with optional AIRTABLE_TABLE_* overrides (only API key + base id mandatory). The security intent is met and the design surfaces this as needing owner acknowledgement, but it diverges from the literal requirement text.",
+      "fix": "Record the accepted reading of FR-24.4 in requirements.md and README.md. If the literal reading is required, drop the constant defaults and treat AIRTABLE_TABLE_* as mandatory whenever Airtable credentials are present."
+    },
+    {
+      "id": "N4",
+      "severity": "NIT",
+      "title": "Two competing OG-image mechanisms for home/blog",
+      "location": "design.md \u00a74 (app/opengraph-image.tsx), \u00a717 (OG from Settings.OgImageUrl or generated brand OG)",
+      "problem": "A file-convention opengraph-image.tsx and generateMetadata openGraph.images (from Settings.OgImageUrl) both set og:image for the same routes, risking duplicate/competing tags and preventing the admin-set Settings.OgImageUrl from reliably winning.",
+      "fix": "Pick one source of truth: drive home/blog OG via generateMetadata (Settings.OgImageUrl then generated fallback) and drop or scope opengraph-image.tsx accordingly."
+    },
+    {
+      "id": "N5",
+      "severity": "NIT",
+      "title": "Airtable rate limiter is per-instance; cross-instance 5 req/s/base not guaranteed",
+      "location": "design.md \u00a76 (client.ts token bucket), \u00a77 (Rate-limit respect), NFR-9.2",
+      "problem": "The token bucket is in-process; concurrent Vercel lambdas each hold their own, so aggregate rate can exceed Airtable's ~5 req/s/base during revalidation bursts. The 'caps all Airtable traffic regardless' claim is stronger than a per-instance limiter guarantees. Acceptable for v1 but not acknowledged (unlike the contact limiter).",
+      "fix": "Document the per-instance limitation and the mitigations (cache-served reads + 429 backoff/retry), mirroring the contact-limiter note in \u00a713/\u00a719."
+    },
+    {
+      "id": "N6",
+      "severity": "NIT",
+      "title": "Edge-runtime compatibility of the middleware auth config is unstated",
+      "location": "design.md \u00a74 (middleware.ts), \u00a79 (middleware redirects unauthenticated \u2192 implies auth() in middleware)",
+      "problem": "Middleware runs on Edge; calling auth() there requires an Edge-compatible config. The current config (Google + JWT + string-only callback) is Edge-safe, but the constraint is unstated, so a later Node-only import/adapter could silently break middleware and the no-creds public render if the matcher widened.",
+      "fix": "State that the config imported by middleware.ts must remain Edge-compatible (JWT only, no adapter) and keep the matcher scoped to /admin/:path* so public routes never invoke auth()."
+    },
+    {
+      "id": "N7",
+      "severity": "NIT",
+      "title": "Admin by-id reads and ProjectImages writers are implied, not enumerated",
+      "location": "design.md \u00a76 ('... one per entity'), \u00a712 (inline gallery editor), \u00a75.6/\u00a75.16, \u00a77",
+      "problem": "Only getProjectById/getBlogPostById are enumerated; other list entities' by-id reads sit under '... one per entity', and ProjectImages create/update/delete (including setting the Project link on create and resolving the parent slug for revalidation) are only implied. These back the /admin/[entity]/[id] pages and the gallery editor.",
+      "fix": "Enumerate getServiceById/getIndustryById/getStatById/getClientById/getReviewById/getTeamMemberById/getNavLinkById and the ProjectImages writers in \u00a76, noting the Project link array on create and the parent-slug source for revalidateTag('project:{slug}')."
+    },
+    {
+      "id": "N8",
+      "severity": "NIT",
+      "title": "Favicon/icon assets placed under public/ rather than the app/ convention",
+      "location": "design.md \u00a74 (public/ icon.png, favicon.ico, apple-icon.png), \u00a724",
+      "problem": "Next.js App Router auto-emits icon <link> tags only for icon files in app/. In public/, favicon.ico works at the root by browser default, but icon.png/apple-icon.png would need manual metadata.icons wiring.",
+      "fix": "Move generated icons to app/icon.png / app/apple-icon.png / app/favicon.ico, or declare them via metadata.icons in the root layout; state which."
+    }
+  ],
+  "reviewDoc": "c:\\Users\\Syed Mehdi Abbas\\Downloads\\datadive\\datadive-web\\.agents\\tasks\\datadive-build\\design-review.md"
+}

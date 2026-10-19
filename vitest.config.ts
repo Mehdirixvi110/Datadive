@@ -17,6 +17,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // `server-only` is resolved by Next's webpack at build time via its
+      // bundled copy; map it to an empty module so the DAL's `import 'server-only'`
+      // guard loads cleanly under Vitest (no network, no build pipeline).
+      "server-only": fileURLToPath(
+        new URL(
+          "./node_modules/next/dist/compiled/server-only/empty.js",
+          import.meta.url,
+        ),
+      ),
     },
   },
 });

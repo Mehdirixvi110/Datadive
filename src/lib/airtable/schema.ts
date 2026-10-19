@@ -1,0 +1,193 @@
+/**
+ * Airtable schema contract (design §5). Table names default to the contract
+ * values below and may be overridden per-table with an optional
+ * `AIRTABLE_TABLE_*` env var (operators who renamed tables). Only
+ * `AIRTABLE_API_KEY` + `AIRTABLE_BASE_ID` are mandatory.
+ *
+ * FIELD maps mirror §5 exactly so the rest of the DAL never hard-codes an
+ * Airtable field name inline. `README.md` must mirror this file.
+ */
+
+function tableName(envKey: string, fallback: string): string {
+  const v = process.env[envKey];
+  return v && v.trim().length > 0 ? v.trim() : fallback;
+}
+
+export const TABLES = {
+  settings: tableName("AIRTABLE_TABLE_SETTINGS", "Settings"),
+  hero: tableName("AIRTABLE_TABLE_HERO", "Hero"),
+  about: tableName("AIRTABLE_TABLE_ABOUT", "About"),
+  services: tableName("AIRTABLE_TABLE_SERVICES", "Services"),
+  projects: tableName("AIRTABLE_TABLE_PROJECTS", "Projects"),
+  projectImages: tableName("AIRTABLE_TABLE_PROJECTIMAGES", "ProjectImages"),
+  industries: tableName("AIRTABLE_TABLE_INDUSTRIES", "Industries"),
+  stats: tableName("AIRTABLE_TABLE_STATS", "Stats"),
+  clients: tableName("AIRTABLE_TABLE_CLIENTS", "Clients"),
+  reviews: tableName("AIRTABLE_TABLE_REVIEWS", "Reviews"),
+  team: tableName("AIRTABLE_TABLE_TEAMMEMBERS", "TeamMembers"),
+  blogPosts: tableName("AIRTABLE_TABLE_BLOGPOSTS", "BlogPosts"),
+  cta: tableName("AIRTABLE_TABLE_CTABAND", "CtaBand"),
+  nav: tableName("AIRTABLE_TABLE_NAVLINKS", "NavLinks"),
+  contactSubmissions: tableName(
+    "AIRTABLE_TABLE_CONTACTSUBMISSIONS",
+    "ContactSubmissions",
+  ),
+} as const;
+
+/** Airtable field-name maps, mirroring §5. */
+export const FIELDS = {
+  settings: {
+    name: "Name",
+    brandName: "BrandName",
+    tagline: "Tagline",
+    contactEmail: "ContactEmail",
+    phone: "Phone",
+    whatsappNumber: "WhatsappNumber",
+    whatsappPrefillMessage: "WhatsappPrefillMessage",
+    linkedinUrl: "LinkedinUrl",
+    websiteUrl: "WebsiteUrl",
+    addressText: "AddressText",
+    logoLightUrl: "LogoLightUrl",
+    logoDarkUrl: "LogoDarkUrl",
+    ogImageUrl: "OgImageUrl",
+    primaryCtaLabel: "PrimaryCtaLabel",
+    primaryCtaHref: "PrimaryCtaHref",
+  },
+  hero: {
+    name: "Name",
+    eyebrow: "Eyebrow",
+    headline: "Headline",
+    subheadline: "Subheadline",
+    primaryCtaLabel: "PrimaryCtaLabel",
+    primaryCtaHref: "PrimaryCtaHref",
+    secondaryCtaLabel: "SecondaryCtaLabel",
+    secondaryCtaHref: "SecondaryCtaHref",
+    imageUrl: "ImageUrl",
+    imageAlt: "ImageAlt",
+  },
+  about: {
+    name: "Name",
+    heading: "Heading",
+    body: "Body",
+    points: "Points",
+    imageUrl: "ImageUrl",
+    imageAlt: "ImageAlt",
+  },
+  services: {
+    name: "Name",
+    description: "Description",
+    icon: "Icon",
+    accent: "Accent",
+    order: "Order",
+    visible: "Visible",
+  },
+  projects: {
+    name: "Name",
+    slug: "Slug",
+    summary: "Summary",
+    body: "Body",
+    coverImageUrl: "CoverImageUrl",
+    coverImageAlt: "CoverImageAlt",
+    images: "Images",
+    tags: "Tags",
+    metrics: "Metrics",
+    featured: "Featured",
+    order: "Order",
+    published: "Published",
+  },
+  projectImages: {
+    name: "Name",
+    project: "Project",
+    imageUrl: "ImageUrl",
+    alt: "Alt",
+    order: "Order",
+  },
+  industries: {
+    name: "Name",
+    description: "Description",
+    icon: "Icon",
+    accent: "Accent",
+    order: "Order",
+    visible: "Visible",
+  },
+  stats: {
+    name: "Name",
+    value: "Value",
+    prefix: "Prefix",
+    suffix: "Suffix",
+    displayOverride: "DisplayOverride",
+    order: "Order",
+    visible: "Visible",
+  },
+  clients: {
+    name: "Name",
+    logoUrl: "LogoUrl",
+    logoAlt: "LogoAlt",
+    sectorGroup: "SectorGroup",
+    websiteUrl: "WebsiteUrl",
+    order: "Order",
+    visible: "Visible",
+  },
+  reviews: {
+    name: "Name",
+    quote: "Quote",
+    role: "Role",
+    company: "Company",
+    avatarUrl: "AvatarUrl",
+    avatarAlt: "AvatarAlt",
+    rating: "Rating",
+    order: "Order",
+    published: "Published",
+  },
+  team: {
+    name: "Name",
+    role: "Role",
+    bio: "Bio",
+    photoUrl: "PhotoUrl",
+    photoAlt: "PhotoAlt",
+    linkedinUrl: "LinkedinUrl",
+    order: "Order",
+    visible: "Visible",
+  },
+  blogPosts: {
+    title: "Title",
+    slug: "Slug",
+    excerpt: "Excerpt",
+    body: "Body",
+    coverImageUrl: "CoverImageUrl",
+    coverImageAlt: "CoverImageAlt",
+    author: "Author",
+    publishDate: "PublishDate",
+    published: "Published",
+    tags: "Tags",
+    seoTitle: "SeoTitle",
+    seoDescription: "SeoDescription",
+  },
+  cta: {
+    name: "Name",
+    heading: "Heading",
+    subtext: "Subtext",
+    primaryCtaLabel: "PrimaryCtaLabel",
+    primaryCtaHref: "PrimaryCtaHref",
+    secondaryCtaLabel: "SecondaryCtaLabel",
+    secondaryCtaHref: "SecondaryCtaHref",
+  },
+  nav: {
+    name: "Name",
+    href: "Href",
+    order: "Order",
+    visible: "Visible",
+    openInNewTab: "OpenInNewTab",
+  },
+  contactSubmissions: {
+    name: "Name",
+    email: "Email",
+    company: "Company",
+    subject: "Subject",
+    phone: "Phone",
+    message: "Message",
+    submittedAt: "SubmittedAt",
+    status: "Status",
+    sourcePage: "SourcePage",
+  },
+} as const;

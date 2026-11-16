@@ -20,3 +20,12 @@ export function hasAuthCreds(): boolean {
       process.env.AUTH_GOOGLE_SECRET,
   );
 }
+
+/**
+ * True when the Vercel Blob write token is present (§10). When absent the admin
+ * `ImageField` disables upload but still accepts a pasted, host-validated Blob
+ * URL. Server-only value — passed to client admin forms as a plain boolean.
+ */
+export function hasBlobToken(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}

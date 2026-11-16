@@ -487,3 +487,45 @@ export const updateSubmissionStatus = (
     { [FIELDS.contactSubmissions.status]: status },
     mapContactSubmission,
   );
+
+// --- Reorder writers (OrderControls — §12) ----------------------------------
+
+/**
+ * Persist a new display order by patching ONLY the `Order` field on each
+ * changed record. Used by the admin list reorder controls; gates on creds and
+ * never throws into the caller (typed result like every other writer).
+ */
+async function reorderRecords(
+  table: string,
+  orderField: string,
+  items: { id: string; order: number }[],
+): Promise<WriteResult<{ count: number }>> {
+  if (!hasAirtableCreds()) return noBackend();
+  try {
+    for (const item of items) {
+      await updateRecord(table, item.id, { [orderField]: item.order });
+    }
+    return { ok: true, data: { count: items.length } };
+  } catch (err) {
+    return airtableFail(table, err);
+  }
+}
+
+type OrderItems = { id: string; order: number }[];
+
+export const reorderServices = (items: OrderItems) =>
+  reorderRecords(TABLES.services, FIELDS.services.order, items);
+export const reorderIndustries = (items: OrderItems) =>
+  reorderRecords(TABLES.industries, FIELDS.industries.order, items);
+export const reorderStats = (items: OrderItems) =>
+  reorderRecords(TABLES.stats, FIELDS.stats.order, items);
+export const reorderClients = (items: OrderItems) =>
+  reorderRecords(TABLES.clients, FIELDS.clients.order, items);
+export const reorderReviews = (items: OrderItems) =>
+  reorderRecords(TABLES.reviews, FIELDS.reviews.order, items);
+export const reorderTeam = (items: OrderItems) =>
+  reorderRecords(TABLES.team, FIELDS.team.order, items);
+export const reorderNavLinks = (items: OrderItems) =>
+  reorderRecords(TABLES.nav, FIELDS.nav.order, items);
+export const reorderProjects = (items: OrderItems) =>
+  reorderRecords(TABLES.projects, FIELDS.projects.order, items);

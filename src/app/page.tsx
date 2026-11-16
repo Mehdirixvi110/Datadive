@@ -1,23 +1,105 @@
+import type { Metadata } from "next";
+import {
+  Hero,
+  About,
+  Services,
+  Industries,
+  Work,
+  Stats,
+  Clients,
+  Reviews,
+  Team,
+  Cta,
+  Contact,
+} from "@/components/sections";
+import {
+  getSettings,
+  getHero,
+  getAbout,
+  getServices,
+  getIndustries,
+  getProjects,
+  getStats,
+  getClients,
+  getReviews,
+  getTeam,
+  getCta,
+} from "@/lib/airtable/read";
+import { buildOpenGraph, ogImageUrl, resolveSiteUrl } from "@/lib/seo";
+
 /**
- * Minimal placeholder home page.
- *
- * FEAT-001 only establishes the scaffold, theme shell, and config. The real
- * home page — composed from the DAL/seed sections — arrives in FEAT-004. This
- * placeholder keeps the zero-env build + render gate green in the meantime.
+ * Home (`/`) — one page composed of RSC sections in the design §11 order
+ * (Hero → About → Services → Industries → Work → Stats → Clients → Reviews →
+ * Team → Cta → Contact). Every section reads already-typed data from the DAL;
+ * public reads are tagged + cached inside the DAL. ISR revalidates hourly.
  */
-export default function HomePage() {
+export const revalidate = 3600;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const base = resolveSiteUrl();
+  const title = "Datadive — Diving Into Data, Driving Decisions";
+  const description =
+    settings.tagline ||
+    "Datadive turns messy data into clear decisions — dashboards, BI, AI, and custom analytics.";
+
+  return {
+    alternates: { canonical: "/" },
+    openGraph: buildOpenGraph({
+      title,
+      description,
+      url: new URL("/", base).toString(),
+      image: ogImageUrl(settings),
+    }),
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl(settings)],
+    },
+  };
+}
+
+export default async function HomePage() {
+  const [
+    hero,
+    about,
+    services,
+    industries,
+    projects,
+    stats,
+    clients,
+    reviews,
+    team,
+    cta,
+    settings,
+  ] = await Promise.all([
+    getHero(),
+    getAbout(),
+    getServices(),
+    getIndustries(),
+    getProjects(),
+    getStats(),
+    getClients(),
+    getReviews(),
+    getTeam(),
+    getCta(),
+    getSettings(),
+  ]);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-      <span className="font-mono text-small uppercase tracking-widest text-depth">
-        Datadive
-      </span>
-      <h1 className="font-display text-display-2 font-bold text-text">
-        Diving Into Data, Driving Decisions
-      </h1>
-      <p className="max-w-xl text-body text-muted">
-        The marketing site scaffold is live. Content sections land in a later
-        build step.
-      </p>
-    </div>
+    <>
+      <Hero hero={hero} />
+      <About about={about} />
+      <Services services={services} />
+      <Industries industries={industries} />
+      <Work projects={projects} />
+      <Stats stats={stats} />
+      <Clients clients={clients} />
+      <Reviews reviews={reviews} />
+      <Team team={team} />
+      <Cta cta={cta} />
+      <Contact settings={settings} />
+    </>
   );
 }

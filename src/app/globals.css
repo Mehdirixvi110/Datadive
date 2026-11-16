@@ -77,6 +77,18 @@
   }
 }
 
+/* Lightweight entrance used by the floating WhatsApp button (design §16). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Honor the user's reduced-motion preference globally (design §16/§18) */
 @media (prefers-reduced-motion: reduce) {
   *,

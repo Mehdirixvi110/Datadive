@@ -58,6 +58,18 @@ const config: Config = {
         body: ["1rem", { lineHeight: "1.6" }],
         small: ["0.875rem", { lineHeight: "1.5" }],
       },
+      // Slow decorative drift for GlowBlob (design §16). Disabled under
+      // prefers-reduced-motion via the `motion-safe:` variant at the call site
+      // and the globals.css reduced-motion guard.
+      keyframes: {
+        "glow-drift": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "50%": { transform: "translate3d(4%, -4%, 0) scale(1.08)" },
+        },
+      },
+      animation: {
+        "glow-drift": "glow-drift 14s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

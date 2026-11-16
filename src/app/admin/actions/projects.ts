@@ -15,9 +15,29 @@ import {
   updateProjectImage,
   deleteProjectImage,
 } from "@/lib/airtable/write";
+import { getAllProjects } from "@/lib/airtable/read";
 import { adminMutate, adminWrite } from "@/lib/admin/mutate";
 import type { AdminFormState } from "@/lib/admin/result";
 import { TAGS, projectTag } from "@/lib/airtable/tags";
+import { slugify, uniqueSlug } from "@/lib/utils";
+
+/**
+ * Resolve the slug to persist (design §13): auto-generate from the name when
+ * blank and make it unique against the other Projects, appending `-2`, `-3`, …
+ * on conflict. The record being edited is excluded so re-saving keeps its slug.
+ */
+async function resolveProjectSlug(
+  input: ProjectInput,
+  excludeId?: string,
+): Promise<ProjectInput> {
+  const existing = (await getAllProjects())
+    .filter((p) => p.id !== excludeId)
+    .map((p) => p.slug);
+  return {
+    ...input,
+    slug: uniqueSlug(input.slug || slugify(input.name), existing),
+  };
+}
 
 /**
  * Projects CRUD + reorder, plus the inline ProjectImages gallery editor
@@ -31,6 +51,7 @@ export async function createProjectAction(values: unknown): Promise<AdminFormSta
   return adminMutate({
     schema: projectSchema,
     values,
+    prepare: (input: ProjectInput) => resolveProjectSlug(input),
     write: (input: ProjectInput) => createProject(input),
     tags: (input: ProjectInput) => [TAGS.projects, projectTag(input.slug)],
     redirectTo: LIST,
@@ -44,6 +65,7 @@ export async function updateProjectAction(
   return adminMutate({
     schema: projectSchema,
     values,
+    prepare: (input: ProjectInput) => resolveProjectSlug(input, id),
     write: (input: ProjectInput) => updateProject(id, input),
     tags: (input: ProjectInput) => [TAGS.projects, projectTag(input.slug)],
     redirectTo: LIST,

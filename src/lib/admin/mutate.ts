@@ -44,10 +44,16 @@ function writeFailure(result: {
   };
 }
 
-/** Validate → DAL write → revalidate → redirect. Used by create/update/save. */
+/**
+ * Validate → (optional) prepare → DAL write → revalidate → redirect. Used by
+ * create/update/save. `prepare` runs INSIDE `withAdmin()` after validation and
+ * may perform admin DAL reads (e.g. to derive a unique slug, §13); the write
+ * and the tag resolution both see its transformed input.
+ */
 export async function adminMutate<S extends z.ZodTypeAny>(config: {
   schema: S;
   values: unknown;
+  prepare?: (input: z.infer<S>) => Promise<z.infer<S>> | z.infer<S>;
   write: (input: z.infer<S>) => Promise<WriteResult<unknown>>;
   tags: readonly string[] | ((input: z.infer<S>) => readonly string[]);
   redirectTo?: string;
@@ -61,11 +67,14 @@ export async function adminMutate<S extends z.ZodTypeAny>(config: {
         fieldErrors: toFieldErrors(parsed.error),
       };
     }
-    const result = await config.write(parsed.data);
+    const input = config.prepare
+      ? await config.prepare(parsed.data)
+      : parsed.data;
+    const result = await config.write(input);
     if (!result.ok) return writeFailure(result);
 
     const tags =
-      typeof config.tags === "function" ? config.tags(parsed.data) : config.tags;
+      typeof config.tags === "function" ? config.tags(input) : config.tags;
     for (const tag of tags) revalidateTag(tag);
 
     if (config.redirectTo) redirect(config.redirectTo);

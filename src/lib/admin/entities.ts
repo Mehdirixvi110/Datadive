@@ -314,7 +314,12 @@ export const ENTITY_FORMS: Record<EntityKey, EntityFormConfig> = {
     schema: projectSchema,
     fields: [
       { name: "name", label: "Name", kind: "text", required: true },
-      { name: "slug", label: "Slug", kind: "text", required: true },
+      {
+        name: "slug",
+        label: "Slug",
+        kind: "text",
+        help: "Leave blank to auto-generate from the name. Made unique on save.",
+      },
       { name: "summary", label: "Summary", kind: "textarea", required: true },
       { name: "body", label: "Body (Markdown)", kind: "textarea", rows: 8 },
       {
@@ -342,7 +347,12 @@ export const ENTITY_FORMS: Record<EntityKey, EntityFormConfig> = {
     schema: blogPostSchema,
     fields: [
       { name: "title", label: "Title", kind: "text", required: true },
-      { name: "slug", label: "Slug", kind: "text", required: true },
+      {
+        name: "slug",
+        label: "Slug",
+        kind: "text",
+        help: "Leave blank to auto-generate from the title. Made unique on save.",
+      },
       { name: "excerpt", label: "Excerpt", kind: "textarea", required: true },
       { name: "body", label: "Body (Markdown)", kind: "textarea", required: true, rows: 10 },
       {

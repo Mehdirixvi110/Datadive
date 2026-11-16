@@ -12,7 +12,7 @@ import {
   ratingSchema,
   requireAltWhenUrl,
   shortTextSchema,
-  slugSchema,
+  optionalSlugSchema,
   titleSchema,
 } from "./common";
 
@@ -140,7 +140,7 @@ export const teamMemberSchema = z
 export const projectSchema = z
   .object({
     name: titleSchema,
-    slug: slugSchema,
+    slug: optionalSlugSchema.optional().default(""),
     summary: longTextSchema,
     body: longTextSchema.optional().default(""),
     coverImageUrl: optionalImageUrlSchema.optional().default(""),
@@ -165,7 +165,7 @@ export const projectImageSchema = z.object({
 export const blogPostSchema = z
   .object({
     title: titleSchema,
-    slug: slugSchema,
+    slug: optionalSlugSchema.optional().default(""),
     excerpt: longTextSchema,
     body: longTextSchema,
     coverImageUrl: optionalImageUrlSchema.optional().default(""),

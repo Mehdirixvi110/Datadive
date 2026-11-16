@@ -78,14 +78,23 @@ export const optionalHttpUrlSchema = z
   });
 
 /** URL-safe slug. */
+export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const slugSchema = z
   .string()
   .min(1, "Required")
   .max(200, "Too long")
-  .regex(
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-    "Lowercase letters, numbers, and single hyphens only",
-  );
+  .regex(SLUG_RE, "Lowercase letters, numbers, and single hyphens only");
+
+/**
+ * Optional slug — empty string allowed. A blank slug is auto-generated from the
+ * title/name when the record is saved and made unique on conflict (design §13).
+ */
+export const optionalSlugSchema = z
+  .string()
+  .max(200, "Too long")
+  .refine((v) => v.length === 0 || SLUG_RE.test(v), {
+    message: "Lowercase letters, numbers, and single hyphens only",
+  });
 
 export const altSchema = z.string().max(200, "Alt text too long");
 

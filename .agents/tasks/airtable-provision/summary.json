@@ -1,0 +1,87 @@
+{
+  "startedAt": "2026-11-16T11:32:18.701Z",
+  "baseId": "appS52F8OZKoDLIqH",
+  "apiKeySource": "datadive-web/.env.local",
+  "whatsappPlaceholder": "19999999999",
+  "tables": [
+    { "name": "Settings", "status": "created", "fieldCount": 15, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Hero", "status": "created", "fieldCount": 10, "fieldsAdded": [], "conflicts": [] },
+    { "name": "About", "status": "created", "fieldCount": 6, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Services", "status": "created", "fieldCount": 6, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Projects", "status": "created", "fieldCount": 11, "fieldsAdded": [], "conflicts": [] },
+    { "name": "ProjectImages", "status": "created", "fieldCount": 4, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Industries", "status": "created", "fieldCount": 6, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Stats", "status": "created", "fieldCount": 7, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Clients", "status": "created", "fieldCount": 7, "fieldsAdded": [], "conflicts": [] },
+    { "name": "Reviews", "status": "created", "fieldCount": 9, "fieldsAdded": [], "conflicts": [] },
+    { "name": "TeamMembers", "status": "created", "fieldCount": 8, "fieldsAdded": [], "conflicts": [] },
+    { "name": "BlogPosts", "status": "created", "fieldCount": 12, "fieldsAdded": [], "conflicts": [] },
+    { "name": "CtaBand", "status": "created", "fieldCount": 7, "fieldsAdded": [], "conflicts": [] },
+    { "name": "NavLinks", "status": "created", "fieldCount": 5, "fieldsAdded": [], "conflicts": [] },
+    { "name": "ContactSubmissions", "status": "created", "fieldCount": 9, "fieldsAdded": [], "conflicts": [] }
+  ],
+  "link": {
+    "created": true,
+    "inverseRenamedTo": "Images",
+    "note": null
+  },
+  "seeded": [
+    { "name": "Settings", "action": "seeded", "requested": 1, "created": 1 },
+    { "name": "Hero", "action": "seeded", "requested": 1, "created": 1 },
+    { "name": "About", "action": "seeded", "requested": 1, "created": 1 },
+    { "name": "CtaBand", "action": "seeded", "requested": 1, "created": 1 },
+    { "name": "Services", "action": "seeded", "requested": 4, "created": 4 },
+    { "name": "Industries", "action": "seeded", "requested": 5, "created": 5 },
+    { "name": "Stats", "action": "seeded", "requested": 5, "created": 5 },
+    { "name": "Clients", "action": "seeded", "requested": 6, "created": 6 },
+    { "name": "Reviews", "action": "seeded", "requested": 3, "created": 3 },
+    { "name": "TeamMembers", "action": "seeded", "requested": 3, "created": 3 },
+    { "name": "NavLinks", "action": "seeded", "requested": 8, "created": 8 },
+    { "name": "BlogPosts", "action": "seeded", "requested": 2, "created": 2 },
+    { "name": "Projects", "action": "seeded", "requested": 9, "created": 9 },
+    { "name": "ProjectImages", "action": "seeded", "requested": 1, "created": 1 },
+    { "name": "ContactSubmissions", "action": "none-by-design", "requested": 0 }
+  ],
+  "verify": {
+    "tables": [
+      { "name": "Settings", "present": true, "fieldCount": 15, "expectedFieldCount": 15, "missingFields": [], "typeMismatches": [] },
+      { "name": "Hero", "present": true, "fieldCount": 10, "expectedFieldCount": 10, "missingFields": [], "typeMismatches": [] },
+      { "name": "About", "present": true, "fieldCount": 6, "expectedFieldCount": 6, "missingFields": [], "typeMismatches": [] },
+      { "name": "Services", "present": true, "fieldCount": 6, "expectedFieldCount": 6, "missingFields": [], "typeMismatches": [] },
+      { "name": "Projects", "present": true, "fieldCount": 12, "expectedFieldCount": 12, "missingFields": [], "typeMismatches": [] },
+      { "name": "ProjectImages", "present": true, "fieldCount": 5, "expectedFieldCount": 5, "missingFields": [], "typeMismatches": [] },
+      { "name": "Industries", "present": true, "fieldCount": 6, "expectedFieldCount": 6, "missingFields": [], "typeMismatches": [] },
+      { "name": "Stats", "present": true, "fieldCount": 7, "expectedFieldCount": 7, "missingFields": [], "typeMismatches": [] },
+      { "name": "Clients", "present": true, "fieldCount": 7, "expectedFieldCount": 7, "missingFields": [], "typeMismatches": [] },
+      { "name": "Reviews", "present": true, "fieldCount": 9, "expectedFieldCount": 9, "missingFields": [], "typeMismatches": [] },
+      { "name": "TeamMembers", "present": true, "fieldCount": 8, "expectedFieldCount": 8, "missingFields": [], "typeMismatches": [] },
+      { "name": "BlogPosts", "present": true, "fieldCount": 12, "expectedFieldCount": 12, "missingFields": [], "typeMismatches": [] },
+      { "name": "CtaBand", "present": true, "fieldCount": 7, "expectedFieldCount": 7, "missingFields": [], "typeMismatches": [] },
+      { "name": "NavLinks", "present": true, "fieldCount": 5, "expectedFieldCount": 5, "missingFields": [], "typeMismatches": [] },
+      { "name": "ContactSubmissions", "present": true, "fieldCount": 9, "expectedFieldCount": 9, "missingFields": [], "typeMismatches": [] }
+    ],
+    "counts": {
+      "Settings": 1,
+      "Hero": 1,
+      "About": 1,
+      "Services": 4,
+      "Projects": 9,
+      "ProjectImages": 1,
+      "Industries": 5,
+      "Stats": 5,
+      "Clients": 6,
+      "Reviews": 3,
+      "TeamMembers": 3,
+      "BlogPosts": 2,
+      "CtaBand": 1,
+      "NavLinks": 8,
+      "ContactSubmissions": 0
+    }
+  },
+  "extraTables": [
+    "Table 1"
+  ],
+  "missingScope": null,
+  "status": "complete",
+  "finishedAt": "2026-11-16T11:32:41.853Z"
+}
